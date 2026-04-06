@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Note, Folder } from '@/lib/types';
 import Sidebar from '@/components/Sidebar';
 import NoteEditor from '@/components/NoteEditor';
+import { FileText } from 'lucide-react';
 
 export default function Home() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -51,12 +52,14 @@ export default function Home() {
     }
   };
 
-  const handleCreateFolder = async (name: string, parentId: string | null = null) => {
+  const handleCreateFolder = async (parentId: string | null = null) => {
+    const name = prompt('Enter folder name:');
+    if (!name?.trim()) return;
     try {
       const res = await fetch('/api/folders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, parentId }),
+        body: JSON.stringify({ name: name.trim(), parentId }),
       });
       const newFolder: Folder = await res.json();
       setFolders((prev) => [...prev, newFolder]);
@@ -99,6 +102,7 @@ export default function Home() {
       setNotes((prev) => prev.map((n) => (n.id === noteId ? updated : n)));
     } catch (err) {
       console.error('Failed to update note:', err);
+      throw err;
     }
   };
 
@@ -135,12 +139,12 @@ export default function Home() {
         selectedNoteId={selectedNoteId}
         onSelectNote={(note: Note) => setSelectedNoteId(note.id)}
         onCreateNote={handleCreateNote}
-        onCreateFolder={(parentId) => handleCreateFolder('New Folder', parentId)}
+        onCreateFolder={handleCreateFolder}
         onDeleteFolder={handleDeleteFolder}
         onDeleteNote={handleDeleteNote}
         onRenameFolder={handleRenameFolder}
       />
-      <main className="flex-1 overflow-hidden">
+      <main className="flex-1 overflow-hidden flex flex-col">
         {selectedNote ? (
           <NoteEditor
             key={selectedNote.id}
@@ -148,17 +152,20 @@ export default function Home() {
             onUpdate={handleNoteUpdate}
           />
         ) : (
-          <div className="flex h-full items-center justify-center">
-            <div className="text-center max-w-sm">
-              <div className="text-6xl mb-4">📝</div>
+          <div className="flex flex-1 h-full items-center justify-center bg-white">
+            <div className="text-center max-w-sm px-6">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center mx-auto mb-4">
+                <FileText size={28} className="text-indigo-400" />
+              </div>
               <h2 className="text-xl font-semibold text-gray-700 mb-2">No note selected</h2>
               <p className="text-gray-400 text-sm mb-6">
                 Select a note from the sidebar or create a new one to get started.
               </p>
               <button
                 onClick={() => handleCreateNote(null)}
-                className="px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
+                className="px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium inline-flex items-center gap-2"
               >
+                <FileText size={16} />
                 Create New Note
               </button>
             </div>

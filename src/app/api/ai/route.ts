@@ -72,10 +72,11 @@ export async function POST(request: NextRequest) {
     messages.push({ role: 'user', content: userMessage });
 
     // Create streaming response
+    // Note: using thinking type "enabled" with budget_tokens for extended reasoning
     const stream = await client.messages.stream({
       model: 'claude-opus-4-6',
-      max_tokens: 4096,
-      thinking: { type: 'adaptive' },
+      max_tokens: 16000,
+      thinking: { type: 'enabled', budget_tokens: 10000 },
       system: systemPrompt,
       messages,
     });
