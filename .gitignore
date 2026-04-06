@@ -3,3 +3,4 @@ node_modules/
 tsconfig.tsbuildinfo
 .env.local
 package-lock.json
+next-env.d.ts
